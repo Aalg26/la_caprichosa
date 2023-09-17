@@ -1,0 +1,104 @@
+resumen: el proyecto de basa en un algoritmo de xgboost que aprende a partir de los datos historicos 
+de cada equipo teniendo en cuenta el desempeño de sus jugadores
+
+
+paso 1: Obtencion de datos historicos
+
+	Sobre las temporadas:
+
+		lo ideal para una base de datos fuerte es tener la mayor cantidad de registros posi-
+		ble por lo cual recomendaria tomar los registros de las ultimas 6 temporadas. 
+	
+	Sobre los equipos:
+
+		Obtener el registro de las ultimas 6  temporadas de cada equipo(en primera y segunda 
+		division) en las 5 grandes ligas(es decir no cuenta la francesa jeje) y almacenarlos en 
+		diccionarios llamados por el nombre de cada liga y la edicion(temporada) en cuestion.
+
+	Sobre los jugadores:
+
+		Obtener el rendimiento de los jugadores por equipo en cada temporada estudiada a partir
+		de este link por ejemplo:https://fbref.com/es/equipos/206d90db/2021-2022/all_comps pero
+		solo se tomaran en cuenta los parametros por 90min dichos en la siguiente lista:
+
+		['Goles sin penalización',  'Goles esperados (xG) sin contar penaltis',  'Asistencias',  'xAG',  'npxG + xAG',
+		'Pases progresivos'listo,  'Acarreos progresivos',  'Pases progresivos Rec',  ' Goles en contra',  'Porcentaje de salvadas',
+		'% Salvadas (Tiros penales)',  'Porcentaje de portería a cero',  'PSxG-GA, PSxG/SoT',  'Lanzamiento %',  'Saques de meta', 
+		'Prom. de longitud de los saques de meta',  'Acciones defensivas fuera del área penal',  'Distancia promedio de las acciones defensivas',
+		'% de cruces detenidos', 'Total de disparos', 'Pases intentados',  '% de pase completo',  'Acciones para la creación de tiros',
+		'Derribos',  'Intercepciones',  'Bloqueos',  'Despeje',  'Toques (Ataq. pen.)',  'Tomas exitosas',  'Toques',  'Aéreos ganados']
+
+tabla estadisticas estandar [0]
+G-TP, npxG, Ast, xAG, npxG+AG,PrgP/90s,PrgC/90s,PrgR/90s 
+
+tabla porteros [1]
+GC90, %Salvadas, %Salvadas, PaC%
+
+tabla porteros avanzado[2]
+PSxG+/-, PSxG/SoT, %deLanzamientos(pases), %deLanzamientos(saque de meta),Long. prom.(saque de meta),% de Stp,Núm. de OPA,DistProm.
+
+tabla tiros [3]	
+Dis/90 s, 	
+
+tabla pases [4]
+'Pases intentados',% Cmp
+
+tabla tipos de pases[5]
+
+tabla Creación de goles y tiros [6]
+ACT
+
+tabla Acciones defensivas[7]
+
+Tkl/90 s, Bloqueos/90 s,Int/90 s,Desp./90 s
+
+tabla Posesión del balón[8]
+'Toques (Ataq. pen.)',Toques,'Tomas exitosas'
+
+tabla Estadísticas diversas [9]
+'Aéreos ganados'
+
+
+paso 2: tratamiento de los datos
+
+	sobre los jugadores:
+
+		Una vez obtenida la tabla de rendimiento de los jugadores en la temporada se dropea la columna
+		que contiene los nombres de los jugadores y se reemplaza los valores NaN por ceros. para luego
+		sacarle el promedio a cada columna, dejando asi la tabla con 32 columnas y un solo registro.
+	
+	sobre los equipos:
+		para empezar creamos un algoritmo que le otorgue un #numero_identificacion a cada equipo del
+		cual se tengan registros.
+
+		se dropean las columnas: Formacion, Arbitro, informe del partido, notas y fecha. 
+
+		creamos una nueva columna llamada edicion que contendrá la temporada en la que se jugo el partido.
+
+		sustituimos los valores de las columnas que no sean valores numericos (de la forma que nos parezca
+		conveniente)
+		
+		sustituir los nombres de los equipos por el numero de identificacion que le pertenezca.
+		
+		cambiar las columnas [resultado, gf, gc] por una columna llamada 'target' donde se mostrara (gf-(menos)gc)
+		por ejemplo si en un registro resultado=V, GF=4, GC=2, la columna target=2.
+		
+		agregamos una columna llamada equipo local en el cual irá el #numero_identificacion del equipo al 
+		que pertenece la tabla repetido en todos los registros.
+		
+		como paso final agregamos las 32 columnas con el promedio del rendimiento de los jugadores del equipo
+		y otras 32 columnas con los datos del equipo rival.
+
+paso 3: Planteamiento del modelo
+
+		En este punto unimos todas las tablas con la data historica de todos los equipos(deberia ser una tabla
+ 		de unas 80-100 columnas) y entrenamos un modelo de xgboost con los siguientes parametros:
+
+
+codigos ligas:
+inglesas=9,10
+
+		
+		
+		
+	
