@@ -109,7 +109,7 @@ def drop_duplicates_columns(tabla,col,pos):#elimina una columna si una tabla tie
 
     return tabla
 
-def get_players_mean(res,url): # ejemplo url https://fbref.com/es/equipos/b8fd03ef/2022-2023/all_comps/Estadisticas-de-Manchester-City-Todas-las-competencias
+def get_players_mean(res,url,): # ejemplo url https://fbref.com/es/equipos/b8fd03ef/2022-2023/all_comps/Estadisticas-de-Manchester-City-Todas-las-competencias
 
     codigoE=url.split('equipos/')[1].split('/20')[0]
     soup=BeautifulSoup(res.text, 'html.parser')

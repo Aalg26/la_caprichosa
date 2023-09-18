@@ -1,4 +1,4 @@
-resumen: el proyecto de basa en un algoritmo de xgboost que aprende a partir de los datos historicos 
+resumen: el proyecto de basa en un algoritmo de xgboost que se ajusta a partir de los datos historicos 
 de cada equipo teniendo en cuenta el desempeño de sus jugadores
 
 
