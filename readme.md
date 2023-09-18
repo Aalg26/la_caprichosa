@@ -52,7 +52,7 @@ Para obtener los datos de Fbref, utilizamos estas bibliotecas en conjunto:
 - ![Pandas](https://img.shields.io/badge/Pandas-Library-orange) **Pandas**: Nos ayuda a estructurar y manejar las tablas de datos recopiladas durante el proceso de extracción.
 
 ## Modelo de Aprendizaje Utilizado: XGBoost
-En este proyecto, hemos seleccionado el modelo de aprendizaje XGBoost, que significa "Extreme Gradient Boosting", como nuestra elección principal para abordar el análisis y predicción de resultados futbolísticos. A continuación, se explican las razones por las cuales XGBoost es un modelo ideal para este tipo de trabajos:
+En este proyecto, hemos seleccionado el modelo de aprendizaje XGBoost, que significa "Extreme Gradient Boosting", como nuestra elección principal para abordar el análisis y predicción de resultados futbolísticos. A continuación, explico algunas de mis razones para elegirlo:
 
 1. Capacidad para Manejar Datos Complejos:
 El mundo del fútbol es intrincado y diverso, con una gran cantidad de variables que pueden influir en el resultado de un partido. XGBoost es capaz de manejar datos complejos y relaciones no lineales entre características, lo que lo convierte en una opción sólida para este proyecto.
