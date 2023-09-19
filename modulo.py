@@ -261,6 +261,10 @@ def get_players_mean(res,url):# ejemplo url https://fbref.com/es/equipos/b8fd03e
 
     ## BLOQUE 5
     resultado=resultado.drop('Posc', axis=1)
+    #me entrega la cantidad de jugadores con mas de 5 min jugados en promedio en la temporada
+    resultado['Jugadores_utiles']=resultado.shape[0]
+    #me entrega en cuantas competiciones participo el equipo en esa temporada
+    resultado['N_competiciones']=tamaño-1
     resultado=resultado.groupby('Jugador').mean().reset_index()
     resultado=resultado.rename(columns={'Jugador':'Equipo id'})
 
@@ -288,3 +292,14 @@ def get_numbers(cadena):
     
     # Si no se encuentran números en la cadena, devuelve 0.
     return 0
+
+def concat_dicts(list_dicts):#recibe una lista de diccionarios
+    #transforma los diccionarios en dataframes
+    dfs_to_concat=[]
+    for dict in list_dicts:
+        dataframe=pd.DataFrame([dict],columns=dict.keys())
+        dfs_to_concat.append(dataframe)
+    #concatena todos los dataframes
+    DataFrame=pd.concat(dfs_to_concat, ignore_index=True)
+    #devuelve un solo dataframe
+    return DataFrame
