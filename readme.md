@@ -9,9 +9,9 @@ El objetivo principal de este proyecto es analizar los resultados históricos de
 Inicialmente, nos centraremos en la inclusión de equipos que compiten en las cinco principales ligas actuales, abarcando tanto la primera como la segunda división. Esto nos llevará a analizar un estimado de alrededor de 200 equipos en total.
 
 ### Definición de Equipos de Primera y Segunda División para el Proyecto
-- **Primera División**: En esta categoría incluiremos a los equipos que han mantenido su presencia en la primera división de su país en los últimos años.
+- **Primera División**: En esta categoría incluiremos a los equipos que han mantenido su presencia en la primera división de su país en al menos las ultimas 3 temporadas.
 
-- **Segunda División**: Los equipos que consideraremos como pertenecientes a la segunda división son aquellos que han experimentado ascensos o descensos entre la primera y la segunda división durante los últimos 5 años. No tendremos en cuenta el tiempo que un equipo haya pasado en divisiones inferiores a estas dos mencionadas.
+- **Segunda División**: Los equipos que consideraremos como pertenecientes a la segunda división son aquellos que han experimentado ascensos o descensos entre la primera y la segunda división durante las ultimas 4 temporadas. No tendremos en cuenta el tiempo que un equipo haya pasado en divisiones inferiores a estas dos mencionadas.
 
 ## Alcance Temporal de los Datos Utilizados
 El alcance de los datos varía según la división a la que pertenezca el equipo:

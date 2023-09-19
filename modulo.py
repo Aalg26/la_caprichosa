@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import time
 import re
+from functools import reduce
 
 #codigos ligas:
 #inglesas=9,10
@@ -109,17 +110,31 @@ def drop_duplicates_columns(tabla,col,pos):#elimina una columna si una tabla tie
 
     return tabla
 
-def get_players_mean(res,url,): # ejemplo url https://fbref.com/es/equipos/b8fd03ef/2022-2023/all_comps/Estadisticas-de-Manchester-City-Todas-las-competencias
-
+def get_players_mean(res,url):# ejemplo url https://fbref.com/es/equipos/b8fd03ef/2022-2023/all_comps/Estadisticas-de-Manchester-City-Todas-las-competencias
+    
     codigoE=url.split('equipos/')[1].split('/20')[0]
     soup=BeautifulSoup(res.text, 'html.parser')
     pagina=pd.read_html(url)
-    tamaño=len(soup.find('div', class_='filter switcher'))
-    tablas=[]
-    tablas.append(pagina[0])
 
     ##BLOQUE 1 
+    tablas=[]
+    tablas.append(pagina[0])# elijo la tabla 0 que son las estadisticas estandar
+    # considero en cuantas competiciones participa el equipo para luego poder elegir las tablas 
+    tamaño=soup.find('div', class_='filter switcher')
+    '''
+    EStas son las tablas que usaré. Las posiciones varian segun las competencias en las que el equipo haya participado, pero suponiendo que solo participó en liga,
+    estas serian las posiciones
+    estandar=pagina[0], porteros=pagina[2], porteros_avanzada=pagina[3],tiros=pagina[4],pases=pagina[5],creacion=pagina[7],acciones_defensivas=pagina[8], 
+    posesion=pagina[9], Estadísticas diversas=pagina[11]'''
 
+    #si solo participa en liga  no habra ningun 'filter switcher' por lo que tamaño será None 
+    if tamaño is None:
+        #normalmente el tamaño contiene una lista con las competiciones en las que participo el equipo + un elemento, como el equipo solo participo en liga 
+        #len(tamaño) deberia ser igual a 2 pero como es None asignaremos el valor de manera manual
+        tamaño=2
+    
+    else:
+        tamaño=len(tamaño)
     #defino que tablas voy a usar
     for i in range(1,5):
         tablas.append(pagina[(i*tamaño-(i-1))])
@@ -134,67 +149,78 @@ def get_players_mean(res,url,): # ejemplo url https://fbref.com/es/equipos/b8fd0
 
     
     ## BLOQUE 2
-    
+     # Lista de columnas relevantes para cada bloque
+    columnas_relevantes = [
+        ['Jugador', 'Posc', 'Edad', '90 s', 'PrgC', 'PrgP', 'PrgR', 'Ast', 'G-TP', 'npxG', 'xAG', 'npxG+xAG'],
+        ['Jugador', 'GC90', '% Salvadas', 'PaC%'],
+        ['Jugador', 'PSxG/SoT', '/90', '%deLanzamientos', 'Int.', '% de Stp', 'Núm. de OPA/90', 'DistProm.', 'Long. prom.'],
+        ['Jugador', 'Dis'],
+        ['Jugador', 'Int.', '% Cmp'],
+        ['Jugador', 'ACT'],
+        ['Jugador', 'Desp.', 'Int', 'Bloqueos', 'Tkl'],
+        ['Jugador', 'Ataq. pen.', 'Toques', 'Succ'],
+        ['Jugador', 'Ganados']
+    ]
     dfs_arreglados=[]
+
     for i, df in enumerate(tablas):
+        # Filtrar las columnas relevantes para este bloque
+        columnas = columnas_relevantes[i]
 
         if i == 0:
             #elimino las columnas duplicadas
             duplicates=['G-TP','npxG','xAG','npxG+xAG']
             for duplicate in duplicates:
                 df=drop_duplicates_columns(df,duplicate,1)
+
             #me quedo con las columnas que necesito
-            df = df.loc[:,['Jugador', 'Posc', 'Edad', '90 s', 'PrgC', 'PrgP', 'PrgR', 'Ast','G-TP', 'npxG', 'xAG', 'npxG+xAG']]
+            df = df.loc[:,columnas]
+
             # como los apartados de Prg estan en total y no por 90min los pasare a 90 min
             Prgs=['PrgC','PrgP','PrgR']   
             for Prg in Prgs:
                 df[f'{Prg}']=round(df[f'{Prg}']/df['90 s'], 2)
-            #agrego el dataframe nuevo a la lista de dfs 
-            dfs_arreglados.append(df)
 
-        if i ==1:
+            
+
+        elif i ==1:
             #me quedo con las columnas que necesito
-            df = df.loc[:, ['Jugador','GC90','% Salvadas','PaC%',]]
-            #agrego el dataframe nuevo a la lista de dfs
-            dfs_arreglados.append(df)
+            df = df.loc[:, columnas]
+            
 
-        if i ==2:    
+        elif i ==2:    
             
             df=drop_duplicates_columns(df,'Long. prom.',1)
             df=drop_duplicates_columns(df,'Int.',2)
             df=drop_duplicates_columns(df,'%deLanzamientos',0)
             df['Int.']=round(df['Int.']/df['90 s'],2)
             #me quedo con las columnas que necesito
-            df = df.loc[:, ['Jugador', 'PSxG/SoT', '/90','%deLanzamientos','Int.','% de Stp', 'Núm. de OPA/90', 'DistProm.', 'Long. prom.']]
-            #agrego el dataframe nuevo a la lista de dfs 
-            dfs_arreglados.append(df)
-        if i == 3:
+            df = df.loc[:, columnas]
+            
+        elif i == 3:
             #cambio el apartado de Dis a Dis por 90min
             df.loc[:, 'Dis'] = round(df['Dis'] / df['90 s'], 2)
             #me quedo con las columnas que necesito
-            df = df.loc[:, ['Jugador','Dis']]
-            #agrego el dataframe nuevo a la lista de dfs
-            dfs_arreglados.append(df)
-        if i == 4:
+            df = df.loc[:, columnas]
+            
+        elif i == 4:
             #elimino las columnas duplicadas
             duplicates=['Int.','% Cmp']
             for duplicado in duplicates:
                 df=drop_duplicates_columns(df,duplicado,0)
             df['Int.']=round(df['Int.']/df['90 s'],2)
             #me quedo con las columnas que necesito
-            df = df.loc[:, ['Jugador','Int.','% Cmp']]
-            #agrego el dataframe nuevo a la lista de dfs
-            dfs_arreglados.append(df)
+            df = df.loc[:, columnas]
+            
 
-        if i == 5:
+        elif i == 5:
 
             df.loc[:,'ACT']=round(df['ACT']/df['90 s'],2)
             #me quedo con las columnas que necesito
-            df = df.loc[:, ['Jugador','ACT']]
-            #agrego el dataframe nuevo a la lista de dfs
-            dfs_arreglados.append(df)
+            df = df.loc[:, columnas]
+            
 
-        if i == 6:
+        elif i == 6:
 
             df=drop_duplicates_columns(df,'Tkl',0)
             df['Tkl']=round(df['Tkl']/df['90 s'], 2)
@@ -202,45 +228,53 @@ def get_players_mean(res,url,): # ejemplo url https://fbref.com/es/equipos/b8fd0
             df['Int']=round(df['Int']/df['90 s'], 2)
             df['Desp.']=round(df['Desp.']/df['90 s'], 2)
             #me quedo con las columnas que necesito
-            df = df.loc[:, ['Jugador','Desp.','Int','Bloqueos','Tkl']]
-            #agrego el dataframe nuevo a la lista de dfs
-            dfs_arreglados.append(df)
+            df = df.loc[:, columnas]
+           
 
-        if i == 7:
+        elif i == 7:
             df.loc[:,'Ataq. pen.']=round(df['Ataq. pen.']/df['90 s'], 2)
             df.loc[:,'Toques']=round(df['Toques']/df['90 s'], 2)
             df.loc[:,'Succ']=round(df['Succ']/df['90 s'], 2)
             #me quedo con las columnas que necesito
-            df = df.loc[:, ['Jugador','Ataq. pen.','Toques','Succ']]
-            #agrego el dataframe nuevo a la lista de dfs
-            dfs_arreglados.append(df)
+            df = df.loc[:,columnas]
+            
 
-        if i == 8:
+        elif i == 8:
 
             df.loc[:,'Ganados']=round(df['Ganados']/df['90 s'], 2)
             #me quedo con las columnas que necesito
-            df = df.loc[:, ['Jugador','Ganados']]
-            #agrego el dataframe nuevo a la lista de dfs
-            dfs_arreglados.append(df)
+            df = df.loc[:,columnas]
+
+        #agrego el dataframe nuevo a la lista de dfs
+        dfs_arreglados.append(df)
 
     ## BLOQUE 3
-    temp=dfs_arreglados[0]
-    i=0
-    while i < 8:
-        resultado = pd.merge(temp,dfs_arreglados[i+1], on='Jugador', how='outer')
-        temp=resultado
-        i+=1
+    resultado = reduce(lambda left, right: pd.merge(left, right, on='Jugador', how='outer'), dfs_arreglados)
+
     ## BLOQUE 4
-    allteams=pd.read_csv(r'C:\Users\ARTUROS\Desktop\Archivos Adrian\personal\proyectos personales\lacaprichosa\dataset\All_teams.csv')
+    resultado=resultado.fillna(0)
+
+    allteams=pd.read_csv('dataset/All_teams.csv')
+
+
     resultado['Jugador']=int(allteams[allteams['id Web']==f'{codigoE}']['id_ml'].iloc[0])
-    resultado.rename(columns={'Jugador':'Equipo'})
 
     ## BLOQUE 5
     resultado=resultado.drop('Posc', axis=1)
     resultado=resultado.groupby('Jugador').mean().reset_index()
     resultado=resultado.rename(columns={'Jugador':'Equipo id'})
 
-    return resultado
+    return resultado 
+
+def league_level(soup):
+    #busca el nivel de la liga
+    text=soup.find_all('div')[22].find('p').get_text(strip=True)
+    matches = re.search(r'(\d+)° Nivel de la liga', text)
+    if matches is None:
+        league_level='El equipo no participa en ninguna liga profesional'
+    else:
+        league_level=matches.group(1)
+    return league_level
 
 def get_numbers(cadena):
     # Utiliza expresiones regulares para encontrar todos los números en la cadena.
