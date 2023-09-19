@@ -275,7 +275,7 @@ def league_level(soup):
     text=soup.find_all('div')[22].find('p').get_text(strip=True)
     matches = re.search(r'(\d+)° Nivel de la liga', text)
     if matches is None:
-        league_level='El equipo no participa en ninguna liga profesional'
+        league_level=4
     else:
         league_level=matches.group(1)
     return league_level
