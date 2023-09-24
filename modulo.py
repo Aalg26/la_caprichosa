@@ -116,6 +116,10 @@ def get_players_mean(res,url):# ejemplo url https://fbref.com/es/equipos/b8fd03e
     soup=BeautifulSoup(res.text, 'html.parser')
     pagina=pd.read_html(url)
 
+    if len(pagina) <30:
+
+        return pd.DataFrame()
+
     ##BLOQUE 1 
     tablas=[]
     tablas.append(pagina[0])# elijo la tabla 0 que son las estadisticas estandar
@@ -272,7 +276,11 @@ def get_players_mean(res,url):# ejemplo url https://fbref.com/es/equipos/b8fd03e
 
 def league_level(soup):
     #busca el nivel de la liga
-    text=soup.find_all('div')[22].find('p').get_text(strip=True)
+    text=soup.find_all('div')[22].find('p')
+    if text is None:
+        return False
+    else:
+        text=text.get_text(strip=True)
     matches = re.search(r'(\d+)° Nivel de la liga', text)
     if matches is None:
         league_level=4

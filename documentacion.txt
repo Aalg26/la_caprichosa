@@ -98,6 +98,12 @@ paso 3: Planteamiento del modelo
 codigos ligas:
 inglesas=9,10
 
+dificultad de la liga: sacando el porcentaje de victorias o tomando la puntuacion uefa
+
+nivel de la competicion: calculando la media de todos los equipos que participan 
+
+
+
 		
 		
 		
